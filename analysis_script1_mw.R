@@ -22,6 +22,7 @@ tnc_ca <- read.csv("./EVT_Percentages/US200EVT_CA_TNC.csv")
   ## top 10 evts
 ## Basic stats
   ## average size of ownership -- histogram
+  ## maybe compare these between regions
 ## case studies -- larger preserves
   ## are the preserves mostly one ecosystem or mixed?
   ## like ellsworht for example
