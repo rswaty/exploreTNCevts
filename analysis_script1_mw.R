@@ -31,26 +31,38 @@ tnc_ca <- read.csv("./EVT_Percentages/US200EVT_CA_TNC.csv")
 
 # add ACRES column based on COUNT
 # COUNT is number of 30x30 m pixels in raster, or 900 m^2
+# add PERCENT column
 evt_ca <- evt_ca %>%
-  mutate(ACRES = round(COUNT * 900 / 4046.86))
+  mutate(ACRES_CA = round(COUNT * 900 / 4046.86),
+         PERCENT_CA = round(ACRES_CA / sum(ACRES_CA), 4)) %>%
+  rename(COUNT_CA = COUNT)
 tnc_ca <- tnc_ca %>%
-  mutate(ACRES = round(COUNT * 900 / 4046.86))
+  mutate(ACRES_TNC = round(COUNT * 900 / 4046.86),
+         PERCENT_TNC = round(ACRES_TNC / sum(ACRES_TNC), 4)) %>%
+  rename(COUNT_TNC = COUNT)
+# join to single data frame
+ca <- left_join(evt_ca, tnc_ca)
 
-# create a vector of ecosystems tnc does not protect
-diff_ca <- setdiff(evt_ca$EVT_NAME, tnc_ca$EVT_NAME)
+# filter ecosystems tnc does not protect
+no_tnc <- ca %>% filter(is.na(COUNT_TNC))
 
+# rank by most abundant ecosystems in ca
+# tally() creates a df of number of rows, pull() isolates just the value
+# a lil sloppy, i know
+ca <- ca %>%
+  arrange(desc(COUNT_CA)) %>%
+  mutate(CA_RANK = c(1:pull(tally(ca))))
 
+# calculate percent of each ca ecosystem protected by tnc
+ca <- ca %>%
+  mutate(PERCENT_PROTECT = round(COUNT_TNC / COUNT_CA, 4)) %>%
+  arrange(desc(PERCENT_PROTECT))
 
-# arrange by descending count, top 10, remove "open water" from evt bc it's dumb
-evt_ca_10 <- evt_ca %>%
-  arrange(desc(COUNT)) %>%
-  filter(!(EVT_NAME == "Open Water")) %>%
-  top_n(10)
-tnc_ca_10 <- tnc_ca %>%
-  arrange(desc(COUNT)) %>%
-  top_n(10)
-
-# check for commonalities
-intersect(evt_ca_10, tnc_ca_10)
-# no dice..
-
+# top ten highest percentages protected by tnc
+ca_10_protect <- ca %>% top_n(10, PERCENT_PROTECT)
+# plot
+# labels show overall rank of ca ecosystem
+ggplot(data = ca_10_protect, aes(x = EVT_NAME, y = PERCENT_PROTECT)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  geom_label(label = ca_10_protect$CA_RANK)
