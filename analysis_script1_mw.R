@@ -33,25 +33,27 @@ tnc_ca <- read.csv("./EVT_Percentages/US200EVT_CA_TNC.csv")
 # COUNT is number of 30x30 m pixels in raster, or 900 m^2
 # add PERCENT column
 evt_ca <- evt_ca %>%
-  mutate(ACRES_CA = round(COUNT * 900 / 4046.86),
-         PERCENT_CA = round(ACRES_CA / sum(ACRES_CA), 4)) %>%
-  rename(COUNT_CA = COUNT)
+  rename(COUNT_CA = COUNT) %>%
+  arrange(desc(COUNT_CA)) %>%
+  mutate(ACRES_CA = round(COUNT_CA * 900 / 4046.86),
+         PERCENT_CA = round(ACRES_CA / sum(ACRES_CA), 4),
+         RANK_CA = 1:pull(tally(evt_ca)))
 tnc_ca <- tnc_ca %>%
-  mutate(ACRES_TNC = round(COUNT * 900 / 4046.86),
-         PERCENT_TNC = round(ACRES_TNC / sum(ACRES_TNC), 4)) %>%
-  rename(COUNT_TNC = COUNT)
+  rename(COUNT_TNC = COUNT) %>%
+  arrange(desc(COUNT_TNC)) %>%
+  mutate(ACRES_TNC = round(COUNT_TNC * 900 / 4046.86),
+         PERCENT_TNC = round(ACRES_TNC / sum(ACRES_TNC), 4),
+         RANK_TNC = 1:pull(tally(tnc_ca)))
+
 # join to single data frame
 ca <- left_join(evt_ca, tnc_ca)
 
 # filter ecosystems tnc does not protect
 no_tnc <- ca %>% filter(is.na(COUNT_TNC))
 
-# rank by most abundant ecosystems in ca
-# tally() creates a df of number of rows, pull() isolates just the value
-# a lil sloppy, i know
-ca <- ca %>%
-  arrange(desc(COUNT_CA)) %>%
-  mutate(CA_RANK = c(1:pull(tally(ca))))
+
+
+###################################################################
 
 # calculate percent of each ca ecosystem protected by tnc
 ca <- ca %>%
