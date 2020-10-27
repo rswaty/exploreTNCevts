@@ -65,7 +65,6 @@ ca_10_protect <- ca %>% top_n(10, PERCENT_PROTECT)
 ggplot(data = ca_10_protect, aes(x = EVT_NAME, y = PERCENT_PROTECT)) +
   geom_bar(stat = "identity") +
   coord_flip() +
-<<<<<<< HEAD
   geom_label(label = ca_10_protect$CA_RANK) +
   labs(title = "Top 10 CA EVTs that TNC protects the most",
        subtitle = "Labels are rank of most prominent ecosystems in CA (i.e '1' is highest count of evt)",
@@ -73,6 +72,6 @@ ggplot(data = ca_10_protect, aes(x = EVT_NAME, y = PERCENT_PROTECT)) +
        y = "Percent protected (TNC count / CA count)")
 # save last plot
 ggsave("./top_10_ca_ecosystems_protected_by_tnc.jpg")
-=======
+
   geom_label(label = ca_10_protect$CA_RANK)
->>>>>>> eb0e0c0819c36ea6e7c1eecda873389ccca4154f
+
