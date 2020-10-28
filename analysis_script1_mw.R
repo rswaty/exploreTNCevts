@@ -51,7 +51,14 @@ ca <- left_join(evt_ca, tnc_ca)
 # filter ecosystems tnc does not protect
 no_tnc <- ca %>% filter(is.na(COUNT_TNC))
 
+###################################################################
+ca_x2 <- ca %>%
+  arrange(desc(COUNT_TNC)) %>%
+  drop_na(COUNT_TNC)
+  
 
+x2 <- chisq.test(table(ca_x2$PERCENT_CA, ca_x2$PERCENT_TNC))
+x2
 
 ###################################################################
 
