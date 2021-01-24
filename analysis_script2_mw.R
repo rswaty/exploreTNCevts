@@ -38,6 +38,10 @@ phys_ca <- ca %>% group_by(EVT_PHYS) %>%
     summarise(phys_percent_ca = sum(PERCENT_CA),
             phys_percent_tnc = sum(PERCENT_TNC))
 
+#Change EVT_PHYS from factor to character 
+phys_ca$EVT_PHYS <- as.character(phys_ca$EVT_PHYS)
+
+
 # rename and subset some shit
 phys_sub_ca <- phys_ca %>% mutate(phys = case_when(
   str_detect(EVT_PHYS, "Developed") ~ "Developed",
@@ -58,7 +62,7 @@ ggplot(data = phys_tidy_ca, aes(x = phys, y = percent)) +
   geom_bar(aes(fill = location), stat = "identity", position = position_dodge2(reverse = T)) +
   ylim(c(0, 40)) +
   coord_flip() +
-  scale_x_discrete(limits = rev) +
+  #scale_x_discrete(limits = rev) +
   labs(title = "LANDFIRE Existing Vegetation Types of California",
        subtitle = "comparison with TNC ownership - grouped by EVT_PHYS",
        x = "",
@@ -78,7 +82,7 @@ evt1_ca <- ca %>% filter(PERCENT_CA >= 1) %>%
 ggplot(data = evt1_ca, aes(x = EVT_NAME, y = diff)) +
   geom_bar(aes(fill = color_score), stat = "identity") +
   coord_flip() +
-  scale_x_discrete(limits = rev) +
+  #scale_x_discrete(limits = rev) +
   scale_y_continuous(breaks = seq(-5, 25, by = 5)) +
   labs(title = "LANDFIRE Existing Vegetation Types of California",
        subtitle = "difference between % TNC ownership and % CA values above 1%",
