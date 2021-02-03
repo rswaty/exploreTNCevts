@@ -57,12 +57,16 @@ phys_tidy_ca <- phys_sub_ca %>%
   pivot_longer(!phys, names_to = "location", values_to = "percent") %>%
   mutate(location = if_else(location == "phys_percent_ca", true = "CA", false = "TNC"))
 
+phys_filter_ca <- phys_tidy_ca %>%
+  filter(!phys %in% c("Snow-Ice", "Open Water", "Quarries and Mining Land"))
+  
+
 # double bar chart
-ggplot(data = phys_tidy_ca, aes(x = phys, y = percent)) +
+ggplot(data = phys_filter_ca, aes(x = phys, y = percent)) +
   geom_bar(aes(fill = location), stat = "identity", position = position_dodge2(reverse = T)) +
   ylim(c(0, 40)) +
   coord_flip() +
-  #scale_x_discrete(limits = rev) +
+  scale_x_discrete(limits = rev) +
   labs(title = "LANDFIRE Existing Vegetation Types of California",
        subtitle = "comparison with TNC ownership - grouped by EVT_PHYS",
        x = "",
@@ -78,14 +82,20 @@ evt1_ca <- ca %>% filter(PERCENT_CA >= 1) %>%
   mutate(diff = PERCENT_TNC - PERCENT_CA,
          color_score = if_else(diff > 0, "TNC above", "TNC below"))
 
+tevt_ca <- evt1_ca %>% slice_max(n = 5, order_by = diff) 
+bevt_ca <- evt1_ca %>% slice_min(n = 5, order_by = diff)
+top2bot <- bind_rows(tevt_ca, bevt_ca) %>%
+  arrange(desc(diff)) %>%
+  mutate(EVT_NAME = factor(EVT_NAME, levels = EVT_NAME))
+
 # plot diverging bar
-ggplot(data = evt1_ca, aes(x = EVT_NAME, y = diff)) +
+ggplot(data = top2bot, aes(x = EVT_NAME, y = diff)) +
   geom_bar(aes(fill = color_score), stat = "identity") +
   coord_flip() +
-  #scale_x_discrete(limits = rev) +
-  scale_y_continuous(breaks = seq(-5, 25, by = 5)) +
+  scale_x_discrete(limits = rev) +
+  #scale_y_continuous(breaks = seq(-10, 20, by = 5)) +
   labs(title = "LANDFIRE Existing Vegetation Types of California",
-       subtitle = "difference between % TNC ownership and % CA values above 1%",
+       subtitle = "For CA EVT area > 1%: difference between %TNC ownership and % total CA",
        x = "",
        y = "Percent difference (%)",
        fill = "") +
@@ -98,7 +108,8 @@ library(sf)
 library(tmap)
 
 ca_shp <- st_read("D:/Shapefiles/california/ca-state-boundary/CA_State_TIGER2016.shp") %>%
-  st_transform(5072) %>%
+  st_transform(crs = "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0
++ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs") %>%
   st_union() %>%
   st_sf()
 
