@@ -44,13 +44,8 @@ ggplot(phys_ca_notowned, aes(x=EVT_PHYS,y=PHYS_PERCENT_CA))+
   geom_bar(stat='identity', position='dodge')+
   xlab("EVT Phys Type")+
   ylab("Percent of CA Area")+
-  ggtitle("Percent Areas of EVTs in CA not owned by TNC")+
+  ggtitle("Percent Areas of EVT PHYS Types in CA not owned by TNC")+
   theme_bw()
-
-ggplot(ca_tennotowned, aes(x=EVT_NAME, y=PERCENT_CA, fill=EVT_PHYS))+
-  geom_bar(stat='identity',position='dodge')+
-  coord_flip()+
-  labs(x="EVT",y="Percent of CA",title="Top 10 EVT's in CA not owned by TNC")
 
 #quesiton for myles- how do I not make the x axis sorted alphabetically? I want it sorted by rank probably
 
@@ -67,10 +62,20 @@ phys_ca_notowned<-phys_ca_notowned%>%
 orderca_tennotowned<-ca_tennotowned%>%
   arrange(desc(PERCENT_CA))%>%
   mutate(EVT_NAME = factor(EVT_NAME, levels=EVT_NAME))
+  
 
-#new graph 
-ggplot(orderca_tennotowned, aes(x=EVT_NAME, y=PERCENT_CA, fill=EVT_PHYS))+
+#I want to replace the "sparsely vegetated" character in the orderca_tennotowned table with "SparselyVegetated" 
+#So I can manually enter the colors I want for the plot
+library(stringr)
+EVT_PHYSNS<-str_replace(orderca_tennotowned$EVT_PHYS," ","")
+
+orderca_tennotowned$EVT_PHYSNS<-EVT_PHYSNS
+
+orderca_tennotowned=subset(orderca_tennotowned, select=-EVT_PHYS)
+
+#Now manually enter colors for plot 
+ggplot(orderca_tennotowned, aes(x=EVT_NAME, y=PERCENT_CA, fill=EVT_PHYSNS))+
   geom_bar(stat='identity',position='dodge')+
   coord_flip()+
-  labs(x="EVT",y="Percent of CA",title="Top 10 EVT's in CA not owned by TNC")
-  
+  labs(x="EVT",y="Percent of CA",title="Top 10 EVT's in CA not owned by TNC")+
+  scale_fill_manual(values=c(Conifer="olivedrab4", Riparian="navy", Grassland="navajowhite1", Shrubland="orange2", Hardwood= "orange4", SparselyVegetated="olivedrab1"))

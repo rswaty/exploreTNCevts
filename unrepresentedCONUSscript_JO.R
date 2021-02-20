@@ -31,7 +31,13 @@ orderconus_tennotowned<-conus_tennotowned%>%
 
 library(stringr)
 
-orderconus_tennotowned<-str_replace_all(orderconus_tennotowned, fixed("Sparsely Vegetated"), "SparselyVegetated")
+EVT_PHYSNS<-str_replace(orderconus_tennotowned$EVT_PHYS," ","")
+
+orderconus_tennotowned$EVT_PHYSNS<-EVT_PHYSNS
+
+orderconus_tennotowned=subset(orderconus_tennotowned, select=-EVT_PHYS)
+
+
 
 phys_conus_notowned<-conus_notowned %>% group_by(EVT_PHYS)%>%
   summarise(PHYS_PERCENT_CONUS = sum(PERCENT_CONUS))%>%
@@ -49,8 +55,8 @@ ggplot(phys_conus_notowned, aes(x=EVT_PHYS,y=PHYS_PERCENT_CONUS))+
   ggtitle("Percent Areas of EVTs in CONUS not owned by TNC")+
   theme_bw()
 
-ggplot(orderconus_tennotowned, aes(x=EVT_NAME, y=PERCENT_CONUS, fill=EVT_PHYS))+
+ggplot(orderconus_tennotowned, aes(x=EVT_NAME, y=PERCENT_CONUS, fill=EVT_PHYSNS))+
   geom_bar(stat='identity',position='dodge')+
   coord_flip()+
   labs(x="EVT",y="Percent of CONUS",title="Top 10 EVT's in CONUS not owned by TNC")+
-  scale_fill_manual(values=c(Conifer="brown4", Riparian="cadetblue1", Grassland="chartreuse2", Shrubland="blueviolet", Hardwood= "brown1"))
+  scale_fill_manual(values=c(Conifer="olivedrab4", Riparian="navy", Grassland="navajowhite1", Shrubland="orange2", Hardwood= "orange4", SparselyVegetated="olivedrab1"))

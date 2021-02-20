@@ -29,6 +29,15 @@ ordermal_tennotowned<-mal_tennotowned%>%
   arrange(desc(PERCENT_MAL))%>%
   mutate(EVT_NAME = factor(EVT_NAME, levels=EVT_NAME))
 
+
+library(stringr)
+EVT_PHYSNS<-str_replace(ordermal_tennotowned$EVT_PHYS," ","")
+
+ordermal_tennotowned$EVT_PHYSNS<-EVT_PHYSNS
+
+ordermal_tennotowned=subset(ordermal_tennotowned, select=-EVT_PHYS)
+
+
 phys_mal_notowned<-mal_notowned %>% group_by(EVT_PHYS)%>%
   summarise(PHYS_PERCENT_MAL = sum(PERCENT_MAL))%>%
   arrange(desc(PHYS_PERCENT_MAL))
@@ -42,7 +51,8 @@ ggplot(phys_mal_notowned, aes(x=EVT_PHYS,y=PHYS_PERCENT_MAL))+
   ggtitle("Percent Areas of EVTs in MAL not owned by TNC")+
   theme_bw()
 
-ggplot(ordermal_tennotowned, aes(x=EVT_NAME, y=PERCENT_MAL, fill=EVT_PHYS))+
+ggplot(ordermal_tennotowned, aes(x=EVT_NAME, y=PERCENT_MAL, fill=EVT_PHYSNS))+
   geom_bar(stat='identity',position='dodge')+
   coord_flip()+
-  labs(x="EVT",y="Percent of MAL",title="Top 10 EVT's in MAL not owned by TNC")
+  labs(x="EVT",y="Percent of MAL",title="Top 10 EVT's in MAL not owned by TNC")+
+  scale_fill_manual(values=c(Conifer="olivedrab4", Riparian="navy", Grassland="navajowhite1", Shrubland="orange2", Hardwood= "orange4", SparselyVegetated="olivedrab1"))
